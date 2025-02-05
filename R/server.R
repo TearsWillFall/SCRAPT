@@ -2,6 +2,18 @@ options(shiny.maxRequestSize=500*1024^2)
 
 # Define server logic required to draw a histogram ----
 
+
+
+#' SCRAPT server
+#' @param input  Server input variables
+#' @param output  Server output variables
+#' @param session  Current session
+#' @param threads  Number of threads to launch SCRAPT
+#' @return
+#' @export
+#'
+#' @examples
+
 server <- function(input, output,session,threads=5){
     sols=read_solutions(tc=seq(0,1,0.01),threads=threads)
 

@@ -1,4 +1,13 @@
 
+# Function to generate plausible state combination
+#' 
+#' @param max_cn Maximum copy number to consider
+#' @return
+#' @export
+#'
+#' @examples
+
+
 generate_states=function(max_cn=100){
         strd=generate_comb(max_cn=max_cn)
         strd=strd %>% distinct(state,col)
@@ -8,11 +17,29 @@ generate_states=function(max_cn=100){
         write.csv("states/states.txt",x=all_states)
 }
 
+
+# Function to read states data
+#' 
+#' @return
+#' @export
+#'
+#' @examples
+
 read_states=function(){
         state_input <- system.file("extdata", "states.txt", package="SCRAPT")
         states=read.csv(state_input)
 }
 
+# Generate grid of states 
+#' 
+#' @param min_cn Minimum copy number to consider in grid
+#' @param max_cn Maximum copy number to consider in grid
+#' @param tc Grid tumour content
+#' @param ploidy Grid ploidy
+#' @return
+#' @export
+#'
+#' @examples
 
 generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
         sols=lapply(seq(min_cn,max_cn,0.25),FUN=function(x){
@@ -141,6 +168,17 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
 
 
 
+# Generate all plausible LoH solutions. Solutions are obtained from precomputed solutions located in inst/extdata/sols
+#' 
+#' @param smpl Sample data
+#' @param sols All precomputed solutions for variable tumour content
+#' @param beta_thr Grid tumour content
+#' @param ploidy Grid ploidy
+#' @return
+#' @export
+#'
+#' @examples
+
 generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.1){
         tryCatch({
                 sols=sols %>% dplyr::bind_rows() %>% 
@@ -219,6 +257,17 @@ generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.1)
 }
 
 
+# Map grid within the plot using polygons
+#
+#' @param min_cn Minimum copy number to consider in grid
+#' @param max_cn Maximum copy number to consider in grid
+#' @param tc Grid tumour content
+#' @param ploidy Grid ploidy
+#' @return
+#' @export
+#'
+#' @examples
+
 generate_locations=function(
     min_cn=0,max_cn=20,tc=1,ploidy=0
 ){              
@@ -227,17 +276,51 @@ generate_locations=function(
 }
 
 
+# Read precomputed solution from external data
+#
+#' @param tc Tumour content solution to read
+#' @param loc Data location within the package
+#' @return
+#' @export
+#'
+#' @examples
+
+
 read_solution=function(tc,loc="extdata"){
         solution_input <- system.file(loc,paste0(tc,".sol"), package="SCRAPT")
         dplyr::as_tibble(read.csv(solution_input,header=TRUE))
 }
 
-read_solutions=function(tc=seq(0,1,0.01),loc="data",threads=5){
+# Read all precomputed solution from external data
+#
+#' @param tc Tumour content solution range to read
+#' @param loc Data location within the package
+#' @param threads Number of threads to use to read solutions
+#' @return
+#' @export
+#'
+#' @examples
+
+
+read_solutions=function(tc=seq(0,1,0.01),loc="extdata",threads=5){
     cl=parallel::makePSOCKcluster(threads)
     sols<-parallel::parLapply(cl,X=tc,fun=read_solution,loc=loc)
     parallel::stopCluster(cl)
     return(sols)
 }
+
+
+
+# Generate polygon area for mapped state within the grid
+#
+#' @param sols Solution grid
+#' @param max_cn Maximum copy number to generate polygon state
+#' @param min_cn Minimum copy number to generate polygon state
+#' @return
+#' @export
+#'
+#' @examples
+
 
 
 generate_area=function(sols,max_cn,min_cn){
@@ -331,6 +414,13 @@ generate_area=function(sols,max_cn,min_cn){
 }
 
 
+
+# Build buttons for shiny app
+#
+#' @export
+#'
+#' @examples
+
  build_buttons=function(
         ){
                  plot_types=as_tibble(
@@ -358,6 +448,24 @@ generate_area=function(sols,max_cn,min_cn){
                 return(buttons)
                 }
         }
+
+
+# Plot grid using plotly render
+
+#' @param tc Tumour content to plot
+#' @param ploidy Ploidy to plot
+#' @param samples Sample data to use
+#' @param loc Grid data
+#' @param states Polygon data
+#' @param plot_type Plot type to generate
+#' @param clonal_thr Clonal threshold
+#' @return
+#' @export
+#' @examples
+
+
+
+
 
 
 plot_space=function(
@@ -501,6 +609,16 @@ plot_space=function(
 
 
 
+# Calculate distance from nearest integer for specific tumour content and ploidy
+
+#' @param smpls Sample data
+#' @param new_tc Tumour content
+#' @param new_ploidy Ploidy
+#' @return
+#' @export
+#' @examples
+
+
 generate_distance=function(smpls,new_tc,new_ploidy){
         
         this_tc=new_tc
@@ -541,7 +659,17 @@ generate_distance=function(smpls,new_tc,new_ploidy){
         return(smpls)
 
 }       
-               
+
+# Calculate distance using the original data structure from CLONET
+#'
+#' @param smpls Sample data
+#' @param tc Tumour content
+#' @param ploidy Ploidy
+#' @param cutoff_table Table for gene cut_off values
+#' @return
+#' @export
+#' @examples
+
         
 process_sample<-function(smpls,tc,ploidy,cutoff_table){
         smpls=smpls%>% generate_distance(new_tc=tc,new_ploidy=ploidy)%>%
@@ -563,7 +691,17 @@ process_sample<-function(smpls,tc,ploidy,cutoff_table){
 }
 
 
-  generate_near_solution=function(
+# Generate near solutions from staring tc and ploidy
+#' 
+#' @param sample Sample data
+#' @param range_tc Tumour content range to calculate solutions
+#' @param range_ploidy Ploidy range to calculate solutions
+#' @param threads Number of threads
+#' @return
+#' @export
+#' @examples
+
+generate_near_solution=function(
                                 sample,
                                 range_tc,
                                 range_ploidy,
@@ -577,8 +715,18 @@ process_sample<-function(smpls,tc,ploidy,cutoff_table){
                         summarise(dist=sum(dist_o,na.rm=TRUE))
                         }) %>% dplyr::bind_rows()
                 },range_tc=range_tc) %>% dplyr::bind_rows()
-    }
+}
 
+
+# Calculate distance using the original data structure from CLONET
+#' 
+#' @param smpls Sample data
+#' @param tc Tumour content
+#' @param ploidy Ploidy
+#' @param cutoff_table Table for gene cut_off values
+#' @return
+#' @export
+#' @examples
 
 plot_distances=function(solutions){
         best_sol=solutions[which.min(solutions$dist),]
@@ -599,11 +747,28 @@ plot_distances=function(solutions){
 }
 
 
+# Calculate corrected log2 valus as per CLONET
+#' 
+#' @param log2R Observed Log2R
+#' @param tc Tumour content
+#' @param ploidy Ploidy
+#' @return
+#' @export
+#' @examples
+
+
 correct_log2 <- function(log2R, ploidy, tc) {
         log2_shift <- -log2(ploidy/2)
         log2_pl_corr <- log2R - log2_shift
         return(log2(pmax((2^(log2_pl_corr) - (1-tc)), 0)/tc))
 }
+
+
+# Assign lession type base on CLONET decision tree
+#' 
+#' @return
+#' @export
+#' @examples
 
 
 get_lesion_type <- function( 
@@ -696,6 +861,17 @@ get_lesion_type <- function(
         }
 }
 
+
+# Update input table with updated tc and ploidy
+#' 
+#' @param table Observed Log2R
+#' @param replace Replace original values
+#' @param notes Add notes to the new table
+#' @return
+#' @export
+#' @examples
+
+
 update_table<-function(table,replace=TRUE,notes=""){
     table=table %>% 
     select(
@@ -724,6 +900,14 @@ update_table<-function(table,replace=TRUE,notes=""){
     return(table)
 
   }
+
+
+
+# Check if variables are valid
+#' 
+#' @return
+#' @export
+#' @examples
 
 
 is.valid <- function(...){
