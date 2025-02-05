@@ -1,0 +1,22 @@
+Package: SCRAPT 
+Title: SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)
+Version: 0.0.0.9000
+Authors@R: 
+    person("Osvaldas", "Vainauskas",  "o.vainauskas@ucl.ac.uk", role = c("aut"),
+           comment = c(ORCID = "0009-0005-2060-7007"))
+Description: A convenient method to reassign tumour content and ploidy in samples analysed with CLONET
+License: GPL (>= 3)
+Depends:
+    R (>= 4.3.0)
+Imports:
+    shiny
+    readxl
+    tidyverse
+    patchwork
+    ggrepel
+    plotly
+    shinyWidgets
+    DT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
