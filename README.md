@@ -1,2 +1,2 @@
-# SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour Content)
----
+# SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)![Gear](https://cdns.iconmonstr.com/wp-content/releases/preview/2012/240/iconmonstr-gear-1.png)
+SCRAPT was designed as a complimentary tool to visually and programatically reassign ploidy and tumour content in tumour sample previously analyzed using the CLONET workflow (https://cran.r-project.org/web/packages/CLONETv2/index.html)
