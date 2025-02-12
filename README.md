@@ -13,7 +13,8 @@ SCRAPT can be called in R as follows:
 `library(scrapt)`  
 `scrapt()`
 
-This command will invoke R Shiny server locally
+This command will invoke Shiny R server locally.
+
 
 ## DESCRIPTION
 
