@@ -56,17 +56,17 @@ Additionally, SCRAPT includes a solver to compute nearby solutions within a sele
 </p>
 
 ## EXPLANATION
-In pure tumours, such as cell-lines, the observed copy-number values for the major ($f^A$) and minor alleles ($f^B$) for any given genomc region can be directly extrapolated from the observed values of AI,  $β_i^{Obs}$, and tCN, $CN_i^{Obs}$, such that $β_i^{Real}=β_i^{Obs}$, and $CN_{(i,μ)}^{Real}=CN_{(i,μ)}^{Obs}$.
+In pure tumours, a.k.a cell-lines, the observed copy-number values for the major ($f^A$) and minor alleles ($f^B$) for any given genomc region can be directly extrapolated from the observed values of allelic imbalance,  $β_i^{Obs}$, and total copy-number, $CN_i^{Obs}$, such that $β_i^{Real}=β_i^{Obs}$, and $CN_{(i,μ)}^{Real}=CN_{(i,μ)}^{Obs}$.
 
 <p align="center"> 
   <img width="600" alt="image" src="https://github.com/user-attachments/assets/119b5067-2d3c-4d39-a0d1-fb51b1bdd46e" />
 </p>
 
-However, in reality, tumour biopsies are often impure, containing mixtures of tumour and non-tumour cells that can harbour multiple distinct clones. In tumour biopsies, admixtures of cells are the result of the physical implausibility of the surgeon of macroscopically separate individual cells. The resulting heterogeneity of these admixtures poses a great challenge when resolving the real genomic states of the bulk of the tumour.
+In truth, tumour biopsies are often impure, containing admixtures of tumour and non-tumour cells that can harbour multiple distinct clones. The resulting heterogeneity of these admixtures makes challenging resolving the real genomic states of bulk tumours.
 
 In tumour and normal cell admixtures, the increased levels of normal cells, approximate the observed values for $β_i$ , and $CN_{(i,μ)}$ in the sample to those present in normal diploid cells, and the values for $f_i^A$ and $f_i^B$ to the value of 1, that are expected in the normal diploid genomes.
 
-Under this premise, the observed total copy-number values in the admixture of cells can be modelled as per following:
+Under this premise, the observed total copy-number values in the admixture of cells can be modelled as follows:
 
 <p align="center"> 
   <img width="600" alt="image" src="https://github.com/user-attachments/assets/69134a93-a284-4a82-9893-312838d8d218" />
@@ -87,8 +87,8 @@ Beltran et al., elegantly formulated the definition of the admixture problem for
 It was proposed that under this system of equations, values for the admixture of normal cells, $\lambda$, and ploidy, $\textmu$, can be defined such that best explain the values observed for the major, $f_i^A$ and minor alleles, $f_i^B$, in a particular bulk tumour sample.
 
 In SCRAPT, we exploited the intrisec property of these equations to:
-  1. Derive the expected values of observed proportion of neutral reads, β_i^{Obs}$, and copy-number, CN_{(i,μ)}^{Obs} for a series of known copy-number states (0/0, 0/1,  1/1, ...) and variable fraction of normal cells (0.01 ... 0.99), $\lambda$, and ploidy (2 ... 8), $\textmu$.
-  2. Pre-compute a grid to define the minimum and maximum range of observed proportion of neutral reads β_i^{Obs}$, and copy-number, CN_{(i,μ)}^{Obs} that each copy-number states can be defined within for each combination of fraction of normal cells, $\lambda$ and ploidy, $\textmu$.
+  1. Derive the expected values of observed proportion of neutral reads, $β_i^{Obs}$, and copy-number, $CN_{(i,μ)}^{Obs}$ for a series of known copy-number states (0/0, 0/1,  1/1, ...) and variable fraction of normal cells (0.01 ... 0.99), $\lambda$, and ploidy (2 ... 8), $\textmu$.
+  2. Pre-compute a grid to define the minimum and maximum range of observed proportion of neutral reads $β_i^{Obs}$, and copy-number, $CN_{(i,μ)}^{Obs}$ that each copy-number states can be defined within for each combination of fraction of normal cells, $\lambda$ and ploidy, $\textmu$.
   3. Identify solutions of fraction of normal cells, $\lambda$ and ploidy, $\textmu$, that would align deleterious regions (Log2R < 0 and Beta < 1) to all evaluable LoH state (0/0,0/1,0/2,0/3...)
 
 
