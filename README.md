@@ -5,18 +5,25 @@ SCRAPT was designed as a complimentary tool to visually and programatically reas
 
 ## DESCRIPTION
 
-SCRAPT is built on R Shiny and Plotly. SCRAPT superimposes the total copy-number (tCN/Log2R) and allelic imbalance (Beta) values derived from the CLONET packages and provides a pre-computed grid of allele-specific copy-number (asCN) states for variables fractions of tumour content and ploidy. 
+SCRAPT is an R package built using R Shiny and Plotly to facilitate the visualization and interpretation of allele-specific copy-number (asCN) states. It integrates results from the CLONET workflow, superimposing total copy-number (tCN/Log2R) and allelic imbalance (Beta) values onto a pre-computed grid of potential asCN states across a user-defined range of tumor content and ploidy (**Figure 1**). 
 
 ![Grid](https://github.com/user-attachments/assets/73c5b902-377c-44ef-a8d0-e1700a995499)  
-***Figure 1**: Example of SCRAPT solution grid for tumour content 0.89 and ploidy 3.86*
+***Figure 1**: Example of SCRAPT solution grid for a solution of tumour content 0.89 and ploidy 3.86*
 
-SCRAPT  programatically aligns all potentially deleterious regions derived from the observed data (Log2R<0 and Beta<1) and imputes plausible tumour content and ploidy for LoH compatible solutions across these regions.  Computed solutions are ranked using several metrics (Subclonality Index, Subclonality Distance, Number of clonal regions...) allowing the user to systematically evaluate the fitness of each solution. SCRAPT allows the user to rescale their data based on the selected solution.
+SCRAPT systematically guides users in evaluating the fitness of proposed solutions and provides an interactive interface to semi-manually refine assignments for improved accuracy. To achieve this, SCRAPT (**Figure 2**) :
+
+  -Aligns all likely deleterious regions based on observed data (Log2R < 0 and Beta < 1)
+  -Estimates the most compatible tumor content and ploidy values for each loss of heterozygosity (LoH)-compatible region
+  -Ranks computed solutions using multiple fitness metrics, including the Subclonality Index, Subclonality Distance, and Number of Clonal Regions
+  
+Users can manually explore different solutions by overlaying the data with each candidate grid, allowing for a visual and systematic assessment of solution fitness.
 
 ![Solutions](https://github.com/user-attachments/assets/d09e6db9-4017-4ddb-9cd5-2ef1cef83e1c)  
-***Figure 2**: Example of programatically computed solutions for potentially deleterious regions (Log2R<0 and Beta<1) and their ranking based on predicted subclonality*
+***Figure 2**: Example of programatically computed solutions for potentially deleterious regions (Log2R < 0 and Beta < 1) and their ranking based on predicted subclonality*
 
-SCRAPT incorporates a solver to calculate solutions within a selected range of tumour content and ploidy. 
+![Solver](https://github.com/user-attachments/assets/f2bca6fa-2948-418a-8fda-bad3b086678a)
 
+Additionally, SCRAPT includes a solver to compute nearby solutions within a selected tumor content and ploidy ranges fo help further refine the pre-computed solutions (**Figure 3**). 
 ---
 ## EXPLANATION
 SCRAPT uses the principles of the CLONET paradigm:
