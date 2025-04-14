@@ -10,11 +10,11 @@
 
 generate_states=function(max_cn=100){
         strd=generate_comb(max_cn=max_cn)
-        strd=strd %>% distinct(state,col)
-        strd=strd %>% filter(!grepl("\\.",state))
-        tst=data.frame(state=c("(NA/NA)","[NA/NA]"),col=c("black","black"))
+        strd=strd %>% dplyr::distinct(state,col)
+        strd=strd %>% dplyr::filter(!grepl("\\.",state))
+        tst=data.frame(state=c("(NA/NA)","[NA/NA]",")NA/NA("),col=c("black","black","black"))
         all_states=rbind(strd,tst)
-        write.csv("states/states.txt",x=all_states)
+        write.csv("states.txt",x=all_states)
 }
 
 
@@ -26,7 +26,7 @@ generate_states=function(max_cn=100){
 #' @examples
 
 read_states=function(){
-        state_input <- system.file("extdata", "states.txt", package="SCRAPT")
+        state_input <- system.file("data/states", "states.txt", package="SCRAPT")
         states=read.csv(state_input)
 }
 
@@ -51,21 +51,21 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
                                                 obs_total=((z+x)*tc+(1-tc)*2-ploidy),
                                                 real_total=x+z,
                                                 cna=as.numeric(x),cnb=as.numeric(z),
-                                                chrom="autosomal",
+                                                chrom="autosomal_determinate",
                                                 obs_beta=((x*tc+(1-tc))/((tc*(x+z)+(1-tc)*2)))*2,
                                                 real_beta=x/(z+x)) %>%
                                                 mutate(
                                                    obs_log2=log2(obs_total/2) 
                                                 )
                                 })
-                        }) %>% dplyr::bind_rows() %>% filter(cna<=cnb) %>% 
-                        mutate(
+                        }) %>% dplyr::bind_rows() %>% dplyr::filter(cna<=cnb) %>% 
+                        dplyr::mutate(
                             obs_log2=ifelse(is.infinite(obs_log2),-2,obs_log2),
                             obs_beta=ifelse(is.na(obs_beta)|is.infinite(obs_beta),1,obs_beta),
                             real_beta=ifelse(is.na(real_beta)|is.infinite(real_beta),1,real_beta)) %>%
-                        mutate(
+                        dplyr::mutate(
                             obs_log2=ifelse(is.na(obs_log2),0,obs_log2)) %>%   
-                        mutate(col=ifelse(
+                        dplyr::mutate(col=ifelse(
                                 real_total==0,
                                 "#0000FF",
                                 ifelse(real_total==1,
@@ -96,8 +96,11 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
                                 )
 
                 ))))))%>%
-                mutate(
-                        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),paste0("(",cna,"/",cnb,")"))
+                dplyr::mutate(
+                        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),
+                                ifelse(chrom=="autosomal_determinate",paste0("(",cna,"/",cnb,")"),
+                                        paste0(")",cna,"/",cnb,"("))
+                                )
                 ) 
                 
         
@@ -113,19 +116,19 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
                                                 chrom="X",
                                                 obs_beta=c(-0.05,-0.15),
                                                 real_beta=c(-0.05,-0.15)) %>% 
-                                        mutate(
+                                        dplyr::mutate(
                                             obs_log2=log2(obs_total)
                                         )
                                  
                                 })
-                        }) %>% dplyr::bind_rows() %>% filter(cna<=cnb) %>% 
-                        mutate(
+                        }) %>% dplyr::bind_rows() %>% dplyr::filter(cna<=cnb) %>% 
+                        dplyr::mutate(
                             obs_log2=ifelse(is.infinite(obs_log2),-2,obs_log2),
                             obs_beta=ifelse(is.na(obs_beta)|is.infinite(obs_beta),1,obs_beta),
                             real_beta=ifelse(is.na(real_beta)|is.infinite(real_beta),1,real_beta)) %>%
-                          mutate(
+                        dplyr::mutate(
                             obs_log2=ifelse(is.na(obs_log2),0,obs_log2))%>%
-                        mutate(col=ifelse(
+                        dplyr::mutate(col=ifelse(
                                 real_total==0,
                                 "#0000FF",
                                 ifelse(real_total==1,
@@ -156,14 +159,81 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
                                 )
 
                 ))))))%>%
-                mutate(
-                        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),paste0("(",cna,"/",cnb,")"))
+                dplyr::mutate(
+                        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),
+                                ifelse(chrom=="autosomal_determinate",paste0("(",cna,"/",cnb,")"),
+                                        paste0(")",cna,"/",cnb,"("))
+                                )
                 ) 
-     
 
-        sols=rbind(sols,sols2) %>% 
-        filter(real_total<=max_cn) %>% 
-        as_tibble()
+
+
+                    
+                sols3=lapply(seq(min_cn,max_cn,0.25),FUN=function(x){
+                                lapply(seq(min_cn,max_cn,0.25),FUN=function(z){
+                                        data.frame(
+                                                tc=tc,
+                                                ploidy=ploidy+2,
+                                                obs_total=((z+x)*tc+(1-tc)*2-ploidy),
+                                                real_total=x+z,
+                                                cna=x,cnb=z,
+                                                chrom="autosomal_indeterminate",
+                                                obs_beta=c(1.05,1.15),
+                                                real_beta=c(1.05,1.15)) %>% 
+                                        dplyr::mutate(
+                                            obs_log2=log2(obs_total/2)
+                                        )
+                                 
+                                })
+                        }) %>% dplyr::bind_rows() %>% dplyr::filter(cna==cnb) %>% 
+                        dplyr::mutate(
+                            obs_log2=ifelse(is.infinite(obs_log2),-2,obs_log2),
+                            obs_beta=ifelse(is.na(obs_beta)|is.infinite(obs_beta),1,obs_beta),
+                            real_beta=ifelse(is.na(real_beta)|is.infinite(real_beta),1,real_beta)) %>%
+                        dplyr::mutate(
+                            obs_log2=ifelse(is.na(obs_log2),0,obs_log2))%>%
+                        dplyr::mutate(col=ifelse(
+                                real_total==0,
+                                "#0000FF",
+                                ifelse(real_total==1,
+                                "#ADD8E6",
+                                ifelse(real_total==2,
+                                "#BEBEBE",
+                                ifelse(
+                                real_total==3,
+                                "#FA8072",
+                                ifelse(
+                                        real_total==4,
+                                        "#FF0000",
+                                ifelse(
+                                        real_total==5,
+                                        "#EE0000",
+
+                                ifelse(
+                                        real_total==6,
+                                        "#CD0000",
+                                        ifelse(
+                                        real_total==7,
+                                        "#8B0000",
+                                                "#8B0000"
+
+                                )    
+                                )
+                                
+                                )
+
+                ))))))%>%
+                dplyr::mutate(
+                        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),
+                                ifelse(chrom=="autosomal_determinate",paste0("(",cna,"/",cnb,")"),
+                                        paste0(")",cna,"/",cnb,"("))
+                                )
+                ) 
+
+
+        sols=rbind(sols,sols2,sols3) %>% 
+        dplyr::filter(real_total<=max_cn) %>% 
+        dplyr::as_tibble()
 }
 
 
@@ -179,28 +249,28 @@ generate_comb=function(min_cn=0,max_cn=20,tc=1,ploidy=0){
 #'
 #' @examples
 
-generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.1){
+generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.2){
         tryCatch({
                 sols=sols %>% dplyr::bind_rows() %>% 
-                filter(grepl("\\(0/",state)) %>% 
-                select(-c(X.1,X,X2,Y,L1,L2)) %>% 
-                arrange(tc,state)
+                dplyr::filter(grepl("\\(0/",state)) %>% 
+                dplyr::select(-c(X,X2,Y,L1,L2)) %>% 
+                dplyr::arrange(tc,state)
 
                 this_sol=sols %>%
-                filter(!grepl("\\[",state)) %>% 
-                distinct() %>% 
-                pivot_wider(id_cols=tc,names_from=state,values_from=obs_beta)
+                dplyr::distinct() %>% 
+                tidyr::pivot_wider(id_cols=tc,names_from=state,values_from=obs_beta)
         
 
-                this_sol2=sols %>%filter(!grepl("\\[",state)) %>% distinct() %>% 
-                pivot_wider(id_cols=tc,names_from=state,values_from=obs_log2)
+                this_sol2=sols %>%
+                dplyr::distinct() %>% 
+                tidyr::pivot_wider(id_cols=tc,names_from=state,values_from=obs_log2)
 
-                this_sols=smpl %>% filter(obs_beta<beta_thr,obs_log2<log2_thr,chr!="X")
+                this_sols=smpl %>% 
+                dplyr::filter(obs_beta<beta_thr,obs_log2<log2_thr,chr!="X")
                 
-
-
                 tc_solutions=lapply(this_sols$obs_beta,
-                FUN=function(x){(sapply(abs(this_sol[,-1]-as.numeric(x)),which.min)-1)/100}
+                FUN=function(x){
+                        (sapply(abs(this_sol[,-1]-as.numeric(x)),which.min)-1)/100}
                 ) %>% dplyr::bind_rows()
 
                 expected_beta=tc_solutions
@@ -230,29 +300,34 @@ generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.1)
                 tc_solutions$gene=this_sols$gene
 
                 tc_solutions_longer=tc_solutions %>% 
-                pivot_longer(cols=!gene,values_to="tc")
+                tidyr::pivot_longer(cols=!gene,values_to="tc")
                 pl_solutions_longer=pl_solutions %>% 
-                pivot_longer(cols=!gene,values_to="pl")
+                tidyr::pivot_longer(cols=!gene,values_to="pl")
 
                 all_solutions=dplyr::left_join(tc_solutions_longer,pl_solutions_longer)
 
-                potential_solutions=all_solutions %>% distinct(tc,pl)
+                potential_solutions=all_solutions %>% dplyr::distinct(tc,pl)
 
                 all_dist=lapply(1:nrow(potential_solutions),FUN=function(x){
                         tc=potential_solutions[x,]$tc
                         pl=potential_solutions[x,]$pl
-                        this_dist=generate_distance(smpls=smpl,new_tc=tc,new_pl=pl) %>% 
-                        group_by(id)%>%
-                        summarise(
-                                clonal=sum(dist_o<clonal_thr,na.rm=TRUE),
-                                dist=round(sum(dist_o,na.rm=TRUE),2)) %>%
-                        mutate(tc=tc,pl=pl)
-                }) %>% dplyr::bind_rows()
-
-                all_solutions=dplyr::left_join(all_solutions,all_dist)
+                        this_dist=generate_distance(smpls=smpl,new_tc=tc,new_pl=pl,clonal_thr=clonal_thr) %>% 
+                        dplyr::group_by(id)%>%
+                        dplyr::summarise(
+                                sindex_alt=round(sum(dist_o[cna.int_o!=1&cnb.int_o!=1],na.rm=TRUE)/sum(!is.na(dist_o[cna.int_o!=1&cnb.int_o!=1]),na.rm=TRUE),2),
+                                genes_alt=sum(!is.na(dist_o[cna.int_o!=1&cnb.int_o!=1]),na.rm=TRUE),
+                                sindex_wt=round(sum(dist_o[cna.int_o==1&cnb.int_o==1],na.rm=TRUE)/sum(!is.na(dist_o[cna.int_o==1&cnb.int_o==1]),na.rm=TRUE),2),
+                                genes_wt=sum(!is.na(dist_o[cna.int_o==1&cnb.int_o==1]),na.rm=TRUE),
+                                sindex_all=round(sum(dist_o,na.rm=TRUE)/sum(!is.na(dist_o),na.rm=TRUE),2),
+                                sdist=round(sum(dist_o,na.rm=TRUE),2),
+                                gclonal=sum(clonal_o,na.rm=TRUE)
+                        ) %>%
+                        dplyr::mutate(tc=tc,pl=pl)
+                }) %>% dplyr::bind_rows() 
+                all_solutions=dplyr::left_join(all_solutions,all_dist)%>% dplyr::arrange(sindex_alt,sindex_wt)
                 return(all_solutions)
         },error=function(e){
-                return()
+                return(NULL)
         })
 }
 
@@ -269,11 +344,17 @@ generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.1)
 #' @examples
 
 generate_locations=function(
-    min_cn=0,max_cn=20,tc=1,ploidy=0
+    min_cn=0,
+    max_cn=12,
+    tc=1,
+    ploidy=0
 ){              
-        generate_comb(max_cn=max_cn,min_cn=min_cn)
+        sols=generate_comb(max_cn=max_cn,min_cn=min_cn,tc=tc,ploidy=ploidy)
         generate_area(sols=sols,max_cn=max_cn,min_cn=min_cn)
 }
+    
+
+
 
 
 # Read precomputed solution from external data
@@ -286,8 +367,8 @@ generate_locations=function(
 #' @examples
 
 
-read_solution=function(tc,loc="extdata"){
-        solution_input <- system.file(loc,paste0(tc,".sol"), package="SCRAPT")
+read_solution=function(tc,loc){
+        solution_input <- paste0(loc,"/",tc,".sol")
         dplyr::as_tibble(read.csv(solution_input,header=TRUE))
 }
 
@@ -302,7 +383,8 @@ read_solution=function(tc,loc="extdata"){
 #' @examples
 
 
-read_solutions=function(tc=seq(0,1,0.01),loc="extdata",threads=5){
+
+read_solutions=function(tc=seq(0,1,0.01),loc,threads=5){
     cl=parallel::makePSOCKcluster(threads)
     sols<-parallel::parLapply(cl,X=tc,fun=read_solution,loc=loc)
     parallel::stopCluster(cl)
@@ -375,22 +457,26 @@ generate_area=function(sols,max_cn,min_cn){
        
     })%>% dplyr::bind_rows() %>%
     mutate(
-        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),paste0("(",cna,"/",cnb,")"))
+        state=ifelse(chrom=="X",paste0("[",cna,"/",cnb,"]"),
+        ifelse(chrom=="autosomal_determinate",
+                paste0("(",cna,"/",cnb,")"),
+                paste0(")",cna,"/",cnb,"("))
+                )
     ) 
     
    
     sf_polygon=area_solutions%>%
-    distinct()%>%
+    dplyr::distinct()%>%
     sf::st_as_sf(coords=c("obs_total_margin","obs_beta_margin"))%>%
-    group_by(tc,ploidy,col,chrom,state,obs_beta,obs_total,obs_log2) %>% 
-    summarise()
-    if(tc!=0){
+    dplyr::group_by(tc,ploidy,col,chrom,state,obs_beta,obs_total,obs_log2) %>% 
+    dplyr::summarise()
+    if(unique(sf_polygon$tc)!=0){
         sf_polygon=sf_polygon%>%
         sf::st_cast("POLYGON") %>%
         sf::st_convex_hull()%>%
         sf::st_coordinates()%>%
         as.data.frame()%>%
-        mutate(
+        dplyr::mutate(
                 tc=sf_polygon$tc[L2],
                 ploidy=sf_polygon$ploidy[L2],
                 col=sf_polygon$col[L2],
@@ -402,14 +488,14 @@ generate_area=function(sols,max_cn,min_cn){
                 )
     }else{
          sf_polygon=sf_polygon %>% 
-         mutate(Y=obs_beta,X=obs_total) %>% 
+         dplyr::mutate(Y=obs_beta,X=obs_total) %>% 
         as.data.frame() %>% select(-c(geometry)) 
     }
     
     polygon=sf_polygon %>%
-    mutate(state2=gsub("\\[|\\]|\\(|\\)","",state))%>%
-    mutate(X2=ifelse(chrom=="X",log2(X),log2(X/2))) %>%
-    mutate(X2=ifelse(is.infinite(X2),-2,X2))
+    dplyr::mutate(state2=gsub("\\[|\\]|\\(|\\)","",state))%>%
+    dplyr::mutate(X2=ifelse(chrom=="X",log2(X),log2(X/2))) %>%
+    dplyr::mutate(X2=ifelse(is.infinite(X2),-2,X2))
     return(polygon)
 }
 
@@ -464,10 +550,6 @@ generate_area=function(sols,max_cn,min_cn){
 #' @examples
 
 
-
-
-
-
 plot_space=function(
         tc,
         ploidy,
@@ -475,7 +557,7 @@ plot_space=function(
         loc,
         states,
         plot_type="CN",
-        clonal_thr
+        clonal_thr=0.2
 ){
         n_samples=length(unique(samples$id))
         
@@ -484,7 +566,8 @@ plot_space=function(
         samples=generate_distance(
                         smpls=samples,
                         new_tc=tc,
-                        new_ploidy=ploidy
+                        new_ploidy=ploidy,
+                        clonal_thr=clonal_thr
                 )
  
         scatter_type="none"
@@ -495,22 +578,24 @@ plot_space=function(
         }
         
         if(plot_type=="Log2"){
-                loc=loc %>% mutate(X=X2,obs_total=obs_log2)
-                samples=samples %>% mutate(obs_total=obs_log2)
+                loc=loc %>% dplyr::mutate(X=X2,obs_total=obs_log2)
+                samples=samples %>% dplyr::mutate(obs_total=obs_log2)
         }
 
         
-        samples=samples %>% mutate(state=state_o)     
+        samples=samples %>% dplyr::mutate(state=state_o)     
     
      
       
 
         state_col=unlist(states$col)
         names(state_col)=unlist(states$state)
+    
+
 
         build_space=function(loc,state_col,samples,scatter_type,plot_type){
                 fig=plot_ly()
-                        fig<-fig %>% add_polygons(
+                        fig<-fig %>%  plotly::add_polygons(
                                         data=loc,
                                         x=~X,
                                         y=~Y,
@@ -521,7 +606,7 @@ plot_space=function(
                                                 width=1
                                         )
                                 )%>%
-                                add_trace(
+                                 plotly::add_trace(
                                         data=loc %>%
                                         group_by(state)%>%
                                         summarise(
@@ -534,14 +619,15 @@ plot_space=function(
                                         y=~obs_beta,
                                         text=~state,
                                         marker=list(
+                                                color="black",
                                                 symbol='x'
                                         ),
                                         inherit=FALSE
                                 )
 
                                 if(scatter_type=="multi"){
-                                        fig=fig %>%add_trace(
-                                                data=samples,     
+                                        fig=fig %>% plotly::add_trace(
+                                                data=samples %>% arrange(state),     
                                                 x=~obs_total,
                                                 y=~obs_beta,
                                                 text=~paste0(
@@ -550,53 +636,65 @@ plot_space=function(
                                                         "\nSNPs:",snps,
                                                         "\ncna/cnb:",round(cna_o,2),"/",round(cnb_o,2),
                                                         "\nState:",state_o,
-                                                        "\nDist:",round(dist_o,5)
+                                                        "\nDist:",round(dist_o,3)
                                                         ),
+                                                 marker=list(
+                                                        line=c(
+                                                                color="black",
+                                                                width=~highlight,
+                                                                opacity=~highlight2
+                                                        )
+                                                ),
                                                 symbol=~id,
                                                 inherit=FALSE
                                         )
                                 }else if(scatter_type=="single"){
                                         
-      print(samples %>% distinct(gene,highlight,highlight2))
-                                        fig=fig %>%add_trace(
-                                                data=samples,
+                                        fig=fig %>% plotly::add_trace(
+                                                data=samples %>% arrange(state),
                                                 type="scatter",
                                                 mode="markers",     
                                                 x=~obs_total,
                                                 y=~obs_beta,
                                                 color=~state,
-                                                colors=state_col,
                                                 text=~paste0(
                                                         "Gene:",gene,
                                                         "\nChromosome:",chr,
                                                         "\nSNPs:",snps,
                                                         "\ncna/cnb:",round(cna_o,2),"/",round(cnb_o,2),
                                                         "\nState:",state_o,
-                                                        "\nDist:",round(dist_o,5)
+                                                        "\nDist:",round(dist_o,3)
                                                         ),
-                                                marker=list(opacity=~highlight2),
+                                                marker=list(
+                                                        line=c(
+                                                                color="black",
+                                                                width=~highlight,
+                                                                opacity=~highlight2
+                                                        )
+                                                ),
+                                                colors=state_col,
                                                 inherit=FALSE
                                         )
                                 }
                         
-                        fig=fig %>% layout(
+                        fig=fig %>%  plotly::layout(
                                 showlegend=FALSE,
-                                title=paste0("Analysis of Samples  ",paste0(unique(samples$id),collapse="|")),
-                                yaxis=list(title="Beta",range=list(-0.2,1.1)),
+                                title=paste0(paste0("Analysis of Sample",ifelse(n_samples>1,"s "," ")),paste0(unique(samples$id),collapse="|")),
+                                yaxis=list(title="Beta",range=list(-0.2,1.3)),
                                 annotations=list(x = 0.2 , y = 1, text = paste(
-                                        "Tumour Content: ",tc,
+                                        "TC: ",tc,
                                         "| Ploidy: ",ploidy,
-                                        "| Subclonal Distance:",round(sum(samples$dist_o,na.rm=TRUE),5),
-                                        "| Subclonal Index:",round(sum(samples$dist_o,na.rm=TRUE)/sum(!is.na(samples$dist_o)*0.5),5),
-                                        "| Clonal Genes: ",sum(samples$dist_o<clonal_thr,na.rm=TRUE)
+                                        "| sindex:",round(sum(samples$dist_o,na.rm=TRUE)/sum(!is.na(samples$dist_o)*1),3),
+                                        "| sdist:",round(sum(samples$dist_o,na.rm=TRUE),3),
+                                        "| cgenes: ",sum(samples$clonal_o,na.rm=TRUE)
                                 ),
                                 showarrow = F, xref='paper', yref='paper')
                         )
 
                         if(plot_type=="CN"){
-                                fig %>% layout(xaxis=list(title="Total Copy Number"))
+                                fig %>%  plotly::layout(xaxis=list(title="Total Copy Number"))
                         }else{
-                                fig %>% layout(xaxis=list(title="Log2R"))   
+                                fig %>%  plotly::layout(xaxis=list(title="Log2R"))   
                         }     
         }
 
@@ -619,27 +717,29 @@ plot_space=function(
 #' @examples
 
 
-generate_distance=function(smpls,new_tc,new_ploidy){
+generate_distance=function(smpls,new_tc,new_ploidy,clonal_thr=0.2){
         
         this_tc=new_tc
         if(new_tc==0){
                 this_tc=1
         }
         smpls=smpls %>% 
-        rowwise()%>%
+        dplyr::rowwise()%>%
         dplyr::mutate(
                 cna_o=ifelse(
-                        chr=="X",
+                        chr=="X"|obs_beta>1,
                         (2**(obs_log2+log2(new_ploidy/2))-(1-this_tc))/this_tc,
-                        ((2-obs_beta)*(obs_beta*2**(obs_log2+log2(new_ploidy/2))-(1-new_tc))+2*(1-this_tc)*(1-obs_beta))/(this_tc*obs_beta)),
+                        ((2-obs_beta)*(obs_beta*2**(obs_log2+log2(new_ploidy/2))-(1-this_tc))+2*(1-this_tc)*(1-obs_beta))/(this_tc*obs_beta)),
                 cnb_o=ifelse(
-                        chr=="X",0,(obs_beta*2**(obs_log2+log2(new_ploidy/2))-(1-new_tc))/this_tc)
+                        chr=="X",0,ifelse(obs_beta>1,
+                        (2**(obs_log2+log2(new_ploidy/2))-(1-this_tc))/this_tc,
+                        (obs_beta*2**(obs_log2+log2(new_ploidy/2))-(1-this_tc))/this_tc))
                 )
 
         smpls=smpls%>%
         dplyr::mutate(
             cna.int_o=ifelse(new_tc==0,1,round(cna_o)),
-            cnb.int_o=ifelse(new_tc==0,1,round(cnb_o))
+            cnb.int_o=ifelse(new_tc==0,ifelse(chr=="X",0,1),round(cnb_o))
         )%>%
         dplyr::mutate(
             cna.int_o=ifelse(cna.int_o<0,0,cna.int_o),
@@ -648,13 +748,21 @@ generate_distance=function(smpls,new_tc,new_ploidy){
         dplyr::mutate(
             ploidy_o=new_ploidy,
             tc_o=new_tc,
-            dist_o=min(0.5,((cna.int_o-cna_o)**2+(cnb.int_o-cnb_o)**2)**0.5)
+            dist_o=ifelse(chr=="X",
+                 min(0.25^0.5,((cna.int_o-cna_o)^2+(cnb.int_o-cnb_o)^2)^0.5)/(0.25^0.5),
+                 min(0.5^0.5,((cna.int_o-cna_o)^2+(cnb.int_o-cnb_o)^2)^0.5)/(0.5^0.5))
         )%>%
-        mutate(
+        dplyr::mutate(
+                clonal_o=dist_o<clonal_thr
+        )%>%
+        dplyr::mutate(
                 state_o=ifelse(chr=="X",
                         paste0("[",cnb.int_o,"/",cna.int_o,"]"),
+                        ifelse(
+                                obs_beta>1,
+                                 paste0(")",cnb.int_o,"/",cna.int_o,"("), 
                         paste0("(",cnb.int_o,"/",cna.int_o,")")         
-                )
+                ))
         )
         return(smpls)
 
@@ -671,12 +779,12 @@ generate_distance=function(smpls,new_tc,new_ploidy){
 #' @examples
 
         
-process_sample<-function(smpls,tc,ploidy,cutoff_table){
-        smpls=smpls%>% generate_distance(new_tc=tc,new_ploidy=ploidy)%>%
-        ungroup()%>%
-        mutate(all_log2_corr_o=ifelse(log2_cutoff_pass,correct_log2(all_log2,ploidy,tc),all_log2))%>%
-        rowwise()%>%
-        mutate(cn_call_corr_o=get_lesion_type(
+process_sample<-function(smpls,tc,ploidy,cutoff_table,clonal_thr=0.2){
+        smpls=smpls%>% generate_distance(new_tc=tc,new_ploidy=ploidy,clonal_thr=clonal_thr)%>%
+        dplyr::ungroup()%>%
+        dplyr::mutate(all_log2_corr_o=ifelse(log2_cutoff_pass,correct_log2(all_log2,ploidy,tc),all_log2))%>%
+        dplyr::rowwise()%>%
+        dplyr::mutate(cn_call_corr_o=get_lesion_type(
                 evidence_n = evidence_n,
                 evidence=evidence,
                 gene=gene,
@@ -705,14 +813,15 @@ generate_near_solution=function(
                                 sample,
                                 range_tc,
                                 range_ploidy,
-                                threads=5
+                                threads=5,
+                                clonal_thr=0.1
         ){
         lapply(range_ploidy,
                 FUN=function(p,range_tc){
                 lapply(range_tc,FUN=function(t){
-                        sample %>% generate_distance(new_tc=t,new_ploidy=p) %>% 
-                        group_by(tc_o,ploidy_o) %>%
-                        summarise(dist=sum(dist_o,na.rm=TRUE))
+                        sample %>% generate_distance(new_tc=t,new_ploidy=p,clonal_thr=clonal_thr) %>% 
+                        dplyr::group_by(tc_o,ploidy_o) %>%
+                        dplyr::summarise(dist=sum(dist_o,na.rm=TRUE))
                         }) %>% dplyr::bind_rows()
                 },range_tc=range_tc) %>% dplyr::bind_rows()
 }
@@ -728,10 +837,10 @@ generate_near_solution=function(
 #' @export
 #' @examples
 
-plot_distances=function(solutions){
+plot_distances=function(sample,solutions,tc,ploidy,clonal_thr){
         best_sol=solutions[which.min(solutions$dist),]
-        plot_ly(solutions) %>%plotly::add_heatmap(x=~tc_o,y=~ploidy_o,z=~dist) %>%
-        add_trace(
+        plotly::plot_ly(solutions) %>%plotly::add_heatmap(x=~tc_o,y=~ploidy_o,z=~dist) %>%
+         plotly::add_trace(
                 name="Best Solution",
                 data=best_sol,
                 x=~tc_o,y=~ploidy_o,
@@ -739,7 +848,22 @@ plot_distances=function(solutions){
                         symbol='x'
                 ),
                 inherit=FALSE
-        )%>%layout(
+        )%>%
+        plotly::add_trace(
+                name="Starting Solution",
+                data=generate_distance(sample,new_tc=tc,new_ploidy=ploidy,clonal_thr=clonal_thr) %>% 
+                group_by(tc_o,ploidy_o) %>%
+                summarise(
+                        dist=sum(dist_o,na.rm=TRUE)
+                ),
+                x=~tc_o,y=~ploidy_o,
+                marker=list(
+                        symbol='o'
+                ),
+                inherit=FALSE
+        )%>% 
+        
+        plotly::layout(
                 title=paste0("Distances"),
                 yaxis=list(title="Ploidy"),
                 xaxis=list(title="Tumour Content")
@@ -874,14 +998,14 @@ get_lesion_type <- function(
 
 update_table<-function(table,replace=TRUE,notes=""){
     table=table %>% 
-    select(
+    dplyr::select(
         -starts_with("obs_"),-id
     ) %>%
-    mutate(notes=notes)
+    dplyr::mutate(notes=notes)
 
     if(replace){
         table=table%>%
-        mutate(
+        dplyr::mutate(
                 tc=tc_o,
                 ploidy=ploidy_o,
                 cna=cna_o,
@@ -892,7 +1016,7 @@ update_table<-function(table,replace=TRUE,notes=""){
                 all_log2_corr=all_log2_corr_o,
                 cn_call_corr=cn_call_corr_o
         ) %>% 
-        select(-ends_with("_o"))
+        dplyr::select(-ends_with("_o"))
     }
 
     
@@ -900,7 +1024,6 @@ update_table<-function(table,replace=TRUE,notes=""){
     return(table)
 
   }
-
 
 
 # Check if variables are valid
@@ -920,6 +1043,20 @@ is.valid <- function(...){
 }
 
 
+
+
+generate_solution_map=function(threads=1){
+
+        cl=parallel::makePSOCKcluster(7)
+        parallel::clusterEvalQ(cl,library("tidyverse"))
+        parallel::clusterEvalQ(cl,source("R/functions.R"))
+        parallel::parLapply(cl=cl,
+                seq(0,1,0.01),fun=function(x){
+                sol=generate_locations(min_cn=0,max_cn=12,tc=x,ploidy=0)
+                sol %>% data.table::fwrite(file=paste0("sols/",x,".sol"))
+        })
+        parallel::stopCluster(cl)
+}
 
 
 
