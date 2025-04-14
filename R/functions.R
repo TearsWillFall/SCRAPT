@@ -779,10 +779,10 @@ generate_distance=function(smpls,new_tc,new_ploidy,clonal_thr=0.2){
 #' @examples
 
         
-process_sample<-function(smpls,tc,ploidy,cutoff_table,clonal_thr=0.2){
-        smpls=smpls%>% generate_distance(new_tc=tc,new_ploidy=ploidy,clonal_thr=clonal_thr)%>%
+process_sample<-function(smpls,new_tc,new_ploidy,cutoff_table,clonal_thr=0.2){
+        smpls=smpls%>% generate_distance(new_tc=new_tc,new_ploidy=new_ploidy,clonal_thr=clonal_thr)%>%
         dplyr::ungroup()%>%
-        dplyr::mutate(all_log2_corr_o=ifelse(log2_cutoff_pass,correct_log2(all_log2,ploidy,tc),all_log2))%>%
+        dplyr::mutate(all_log2_corr_o=ifelse(log2_cutoff_pass,correct_log2(all_log2,new_ploidy,new_tc),all_log2))%>%
         dplyr::rowwise()%>%
         dplyr::mutate(cn_call_corr_o=get_lesion_type(
                 evidence_n = evidence_n,
