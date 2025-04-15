@@ -325,7 +325,7 @@ generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.2)
                         dplyr::mutate(tc=tc,pl=pl)
                 }) %>% dplyr::bind_rows() 
                 all_solutions=dplyr::left_join(all_solutions,all_dist)%>% dplyr::arrange(sindex_alt,sindex_wt)
-                return(all_solutions)
+                return(all_solutions %>% filter(tc_o!=0,tc_o!=1))
         },error=function(e){
                 return(NULL)
         })
