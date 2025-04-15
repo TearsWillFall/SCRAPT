@@ -314,18 +314,14 @@ generate_del_solutions<-function(smpl,sols,beta_thr=1,log2_thr=0,clonal_thr=0.2)
                         this_dist=generate_distance(smpls=smpl,new_tc=tc,new_pl=pl,clonal_thr=clonal_thr) %>% 
                         dplyr::group_by(id)%>%
                         dplyr::summarise(
-                                sindex_alt=round(sum(dist_o[cna.int_o!=1&cnb.int_o!=1],na.rm=TRUE)/sum(!is.na(dist_o[cna.int_o!=1&cnb.int_o!=1]),na.rm=TRUE),2),
-                                genes_alt=sum(!is.na(dist_o[cna.int_o!=1&cnb.int_o!=1]),na.rm=TRUE),
-                                sindex_wt=round(sum(dist_o[cna.int_o==1&cnb.int_o==1],na.rm=TRUE)/sum(!is.na(dist_o[cna.int_o==1&cnb.int_o==1]),na.rm=TRUE),2),
-                                genes_wt=sum(!is.na(dist_o[cna.int_o==1&cnb.int_o==1]),na.rm=TRUE),
                                 sindex_all=round(sum(dist_o,na.rm=TRUE)/sum(!is.na(dist_o),na.rm=TRUE),2),
                                 sdist=round(sum(dist_o,na.rm=TRUE),2),
                                 gclonal=sum(clonal_o,na.rm=TRUE)
                         ) %>%
                         dplyr::mutate(tc=tc,pl=pl)
                 }) %>% dplyr::bind_rows() 
-                all_solutions=dplyr::left_join(all_solutions,all_dist)%>% dplyr::arrange(sindex_alt,sindex_wt)
-                return(all_solutions %>% filter(tc_o!=0,tc_o!=1))
+                all_solutions=dplyr::left_join(all_solutions,all_dist)%>% dplyr::arrange(sindex_all)
+                return(all_solutions %>% filter(tc!=0,tc!=1))
         },error=function(e){
                 return(NULL)
         })
