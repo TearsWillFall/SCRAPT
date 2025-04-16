@@ -541,7 +541,7 @@ scrapt=function(idata=NULL,threads=NULL){
                                 content = function(file) {
                                 vroom::vroom_write(
                                 this_sample() %>%
-                                    process_sample(tc=input_tc(),ploidy=input_ploidy(),cutoff_table=cutoff_table()) %>%
+                                    process_sample(new_tc=input_tc(),new_ploidy=input_ploidy(),cutoff_table=cutoff_table()) %>%
                                     update_table(replace=input$replace,notes=input$notes), file)
                                 }
                             )
