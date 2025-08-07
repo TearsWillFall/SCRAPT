@@ -1,5 +1,5 @@
 # [<img src="306030.svg" width=4.5% title="Gear" alt="Gear"/>](306030.svg) SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)
-SCRAPT was designed as a complimentary tool to visually and programatically reassign ploidy and tumour content in tumour sample previously analyzed using the [CLONET](https://cran.r-project.org/web/packages/CLONETv2/index.html) workflow 
+SCRAPT is a complementary R Shiny tool designed to visually and programmatically reassign ploidy and tumour content in tumour samples that have previously undergone analysis using the [CLONET](https://cran.r-project.org/web/packages/CLONETv2/index.html) workflow.
 
 ## INSTALLATION
 SCRAPT package can be installed using the following command: 
@@ -8,17 +8,97 @@ SCRAPT package can be installed using the following command:
 
 
 ## USE
-SCRAPT can be called in R as follows:  
+### LAUNCH SCRAPT
+
+SCRAPT can be launched in R as follows:  
 
 `library(scrapt)`  
 `scrapt()`
 
 This command will invoke Shiny R server locally.
 
+<p align="center">
+  <img width="2832" height="1370" alt="SCRAPT" src="https://github.com/user-attachments/assets/65e0dc03-13fc-4f57-9bdc-2ce2cd9a929a" />
 
-## DESCRIPTION
+</p>
+<p align="center"> 
+    <i><b>Figure 1:</b> SCRAPT user interface. The UI is divided into two main sections: control panels on the left and visualization panels on the right. <ul> <b>Import/Export Panel</b>: Load and export sample data and select samples. <b>Main Plot Controls</b>: Adjust tumour content and ploidy parameters for grid visualization. <b>Solver Control</b>: Interactively adjust ploidy and tumour content to refine model solutions. <b>Update Plot</b>: Displays the updated grid plot based on current settings. <b>Reference Plot</b>: Displays the plot based on the default settings. <b>Solver</b>: Displays the solution space for the solver. </ul></i></p>
+</p>
 
-SCRAPT is an R package built using R Shiny and Plotly to facilitate the visualization and interpretation of allele-specific copy-number (asCN) states. It integrates results from the CLONET workflow, superimposing total copy-number (tCN/Log2R) and allelic imbalance (Beta) values onto a pre-computed grid of potential asCN states across a user-defined range of tumor content and ploidy (**Figure 1**). 
+### LOAD DATA
+Use the Import/Export panel on the left side of the interface (Figure 1) to upload your data:
+
+- Datasets must include one or more samples, each with a unique sample ID.
+  
+- Currently, only datasets processed using the PCF_SELECT workflow from CLONETv2 are supported.
+  
+- Other formats must be converted to the compatible PCF_SELECT format before use.
+
+
+
+### SELECT SAMPLE
+Use the dropdown menu in the Import/Export panel to select one or more samples for analysis.
+
+- SCRAPT will focus on the first selected sample to determine initial ploidy and tumour content.
+
+- The corresponding grid will be generated and updated accordingly.
+
+### VISUALIZE THE GRID
+
+Overlaid on this scatter plot is a grid showing the expected positions of different integer copy-number states (e.g. 0/1, 1/2, 2/2), calculated based on the current tumour content and ploidy values. By default, the grid uses the tumour content and ploidy provided in the imported CLONETv2 data.
+
+Each copy-number state is color-coded to reflect increasing total copy number, allowing for intuitive interpretation of the genomic landscape.
+
+`⚠️ Note: The maximum displayed grid size is 12 (i.e., up to 12 total copies). Extremely focal amplifications beyond this limit are still resolved internally but will not display the grid.
+This constraint is currently fixed to prevent excessive I/O and rendering times.`
+
+The grid is divided into three distinct areas: 
+
+- 🔷 Top area:
+Represents autosomal regions where no informative SNPs are available, but log2 R values are estimated.
+Copy-number states in this area are shown using open parentheses, e.g. )1/1(, indicating that allele-specific copy number cannot be resolved.
+
+- 🟩 Middle area (largest):
+Represents autosomal regions where both β values and log2 R values are available.
+Copy-number states are shown using closed parentheses, e.g. (1/1), indicating that the copy-number state can be resolved allele-specifically.
+
+- 🟥 Bottom area:
+Represents X chromosome regions, where only log2 R values can be estimated.
+Copy-number states are shown using square brackets, e.g. [0/1], indicating that only one allele is present (as expected due to X chromosome biology in male samples or loss of heterozygosity in female samples).
+
+`📌 These visual cues help interpret the confidence and type of copy-number information available for each genomic region.`
+
+
+At the top of the scatter plot, SCRAPT displays:
+
+- Tumour content
+
+- Ploidy
+
+- Subclonality index: the scaled sum of normalized Euclidean distances between observed regions and their nearest predicted integer copy-number states.
+
+- Subclonality distance: the raw (unscaled) sum of these distances.
+
+- Number of clonal regions: by default, a region is considered clonal if it lies within a defined threshold distance from its expected copy-number state (see definition below).
+
+`⚠️ Note: The definition of "clonal" can be adjusted by the user within the UI parameters.`
+
+For each dot in the scatter plot, hovering reveals detailed information about the corresponding gene region, including:
+
+X and Y coordinates: Exact values for total copy number (or log2 R) and allelic imbalance (β value)
+
+- Gene name: The annotated gene within the genomic region
+
+- Number of SNPs: Informative SNPs used in the β value calculation
+
+- Predicted copy number A and B: (cnA, cnB) values based on the current grid configuration
+
+- Nearest integer copy-number state: e.g. (1/1), (2/0), etc.
+
+- Euclidean distance to nearest state: Distance between the observed point and the predicted integer state in copy-number space
+
+`ℹ️ This information is useful for assessing how well individual gene regions conform to the current tumour content and ploidy model.`
+
 <p align="center">
   <img alt="Grid" src="https://github.com/user-attachments/assets/73c5b902-377c-44ef-a8d0-e1700a995499" />
 </p>
@@ -28,13 +108,45 @@ SCRAPT is an R package built using R Shiny and Plotly to facilitate the visualiz
 </p>
 
 
-SCRAPT systematically guides users in evaluating the fitness of proposed solutions and provides an interactive interface to semi-manually refine assignments for improved accuracy. To achieve this, SCRAPT (**Figure 2**) :
 
-- Aligns all likely deleterious regions based on observed data (Log2R < 0 and Beta < 1)
-- Estimates the most compatible tumor content and ploidy values for each loss of heterozygosity (LoH)-compatible region
-- Ranks computed solutions using multiple fitness metrics, including the Subclonality Index, Subclonality Distance, and Number of Clonal Regions
-  
-Users can manually explore different solutions by overlaying the data with each candidate grid, allowing for a visual and systematic assessment of solution fitness.
+### EXPLORE DIFFERENT SOLUTIONS
+
+SCRAPT offers several ways to explore tumour content and ploidy solutions.
+
+The most straightforward method is through manual adjustment of tumour content and ploidy using the Main Plot Controls panel on the left. Modifying these values will automatically update the grid overlay on the scatter plot to reflect the new solution.
+
+To evaluate how well a particular combination of tumour content and ploidy fits the data, users can refer to the following metrics displayed above the plot:
+
+- Subclonality Index/Subclonality Distance
+- Number of Clonal Regions
+
+An optimal solution is typically one where the majority of regions are clonal, meaning the observed values closely align with expected copy-number states. This is reflected by a low Subclonality Index and a high number of clonal regions.
+
+`✅ Tip: Iteratively adjusting tumour content and ploidy while monitoring these metrics can help identify the most biologically plausible solution`.
+
+Another approach SCRAPT provides for exploring tumour content and ploidy models is through the identification of gene regions compatible with loss of heterozygosity (LoH)—e.g. copy-number state 0/1.
+
+SCRAPT selects candidate regions based on the following criteria:
+
+- Allelic imbalance: β value < 1
+
+- Evidence of deletion: Total copy number < 2
+
+For each candidate region and its corresponding potential LoH copy-number states, SCRAPT estimates a tumour content and ploidy combination that minimizes the Euclidean distance between the observed copy-number values and the expected integer LoH state for that region. This allows users to evaluate and compare multiple biologically plausible solutions, grounded in focal LoH events, using global metrics of fit and clonality.
+
+Each resulting solution is presented in a summary table, which includes:
+
+- The gene region and the LoH state under consideration (e.g., 0/1, 0/2, 0/3 ...)
+
+- The estimated tumour content and ploidy that best fit the selected state
+
+- The Euclidean distance for the fit
+
+- The corresponding Subclonality Index
+
+- The number of clonal regions under this solution
+
+`🧠 This method is especially useful when searching for biologically meaningful ploidy/tumour content values grounded in known or expected LoH events.`
 
 <p align="center">
   <img alt="LoH" src="https://github.com/user-attachments/assets/d09e6db9-4017-4ddb-9cd5-2ef1cef83e1c" />
@@ -46,7 +158,8 @@ Users can manually explore different solutions by overlaying the data with each 
 </p>
 
 
-Additionally, SCRAPT includes a solver to compute nearby solutions within a selected tumor content and ploidy ranges fo help further refine the pre-computed solutions (**Figure 3**).
+Lastly, SCRAPT implements a solver to find solutions for a range of tumour content and ploidy models starting from a base tumour and content.
+
 
 <p align="center">
   <img alt="Solver" src="https://github.com/user-attachments/assets/f2bca6fa-2948-418a-8fda-bad3b086678a" />
@@ -55,43 +168,6 @@ Additionally, SCRAPT includes a solver to compute nearby solutions within a sele
 <p align="center"> 
     <i><b>Figure 3</b>: Example of near-solution space for a solution of tumour content 0.89 and ploidy 3.86 with a range of +/-0.5 and +/-3, for tumour content and ploidy       respectively</i> 
 </p>
-
-## EXPLANATION
-In pure tumours, a.k.a cell-lines, the observed copy-number values for the major ($f^A$) and minor alleles ($f^B$) for any given genomc region can be directly extrapolated from the observed values of allelic imbalance,  $β_i^{Obs}$, and total copy-number, $CN_i^{Obs}$, such that $β_i^{Real}=β_i^{Obs}$, and $CN_{(i,μ)}^{Real}=CN_{(i,μ)}^{Obs}$.
-
-<p align="center"> 
-  <img width="600" alt="image" src="https://github.com/user-attachments/assets/119b5067-2d3c-4d39-a0d1-fb51b1bdd46e" />
-</p>
-
-In truth, tumour biopsies are often impure, containing admixtures of tumour and non-tumour cells that can harbour multiple distinct clones. The resulting heterogeneity of these admixtures makes challenging resolving the real genomic states of bulk tumours.
-
-In tumour and normal cell admixtures, the increased levels of normal cells, approximate the observed values for $β_i$ , and $CN_{(i,μ)}$ in the sample to those present in normal diploid cells, and the values for $f_i^A$ and $f_i^B$ to the value of 1, that are expected in the normal diploid genomes.
-
-Under this premise, the observed total copy-number values in the admixture of cells can be modelled as follows:
-
-<p align="center"> 
-  <img width="600" alt="image" src="https://github.com/user-attachments/assets/69134a93-a284-4a82-9893-312838d8d218" />
-</p>
-
-Similarly, the observed fraction of neutral reads within the admixture of cells can be modelled as follows:
-
-<p align="center"> 
-  <img width="600" alt="image" src="https://github.com/user-attachments/assets/a37ea1c1-15c6-4342-af06-ca277287c8c9" />
-</p>
-
-Beltran et al., elegantly formulated the definition of the admixture problem for each allele independetely, and modelled it under the variables of admixture of normal cells, $\lambda$, and ploidy, $\textmu$, in the following equation: 
-
-<p align="center">
-  <img width="600" alt="image" src="https://github.com/user-attachments/assets/7eee192e-1ff8-4c3d-a42b-98d09a2c2e75" />
-</p>
-
-It was proposed that under this system of equations, values for the admixture of normal cells, $\lambda$, and ploidy, $\textmu$, can be defined such that best explain the values observed for the major, $f_i^A$ and minor alleles, $f_i^B$, in a particular bulk tumour sample.
-
-In SCRAPT, we exploited the intrisec property of these equations to:
-  1. Derive the expected values of observed proportion of neutral reads, $β_i^{Obs}$, and copy-number, $CN_{(i,μ)}^{Obs}$ for a series of known copy-number states (0/0, 0/1,  1/1, ...) and variable fraction of normal cells (0.01 ... 0.99), $\lambda$, and ploidy (2 ... 8), $\textmu$.
-  2. Pre-compute a grid to define the minimum and maximum range of observed proportion of neutral reads $β_i^{Obs}$, and copy-number, $CN_{(i,μ)}^{Obs}$ that each copy-number states can be defined within for each combination of fraction of normal cells, $\lambda$ and ploidy, $\textmu$.
-  3. Identify solutions of fraction of normal cells, $\lambda$ and ploidy, $\textmu$, that would align deleterious regions (Log2R < 0 and Beta < 1) to all evaluable LoH state (0/0,0/1,0/2,0/3...)
-
 
 
 
