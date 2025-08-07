@@ -9,7 +9,7 @@ Authors@R:
 Description: A convenient method to reassign tumour content and ploidy in samples analysed with CLONET
 License: GPL (>= 3)
 Depends:
-    R (>= 4.3.0)
+    R (>= 3.6.0)
 Imports:
     shiny,
     readxl,
