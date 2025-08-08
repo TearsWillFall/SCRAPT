@@ -9,9 +9,9 @@ SCRAPT is a complementary R Shiny tool designed to visually and programmatically
 - Francesco et al. (2022) [doi:10.1093/narcan/zcac016](https://pubmed.ncbi.nlm.nih.gov/35664542/)
 
 ## Table of Contents
-- [<img src="306030.svg" width=4.5% title="Gear" alt="Gear"/>](306030.svg) SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)
+- [<img src="306030.svg" width=2.5% title="Gear" alt="Gear"/>](306030.svg) SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)
   * [📦 Installation](#---installation)
-  * [Usage](#usage)
+  * [📘 Usage](#usage)
     + [🚀 Launch](#---launch)
     + [📂 Importing Data](#---importing-data)
     + [🔍 Selecting Samples](#---selecting-samples)
@@ -20,7 +20,7 @@ SCRAPT is a complementary R Shiny tool designed to visually and programmatically
     + [📤 Exporting Data](#---exporting-data)
 
 
-## 📦 Installation
+## Installation
 SCRAPT package can be installed using the following command: 
 
 
@@ -28,7 +28,7 @@ SCRAPT package can be installed using the following command:
 
 
 ##  Usage
-### 🚀 Launch
+### Launch
 
 SCRAPT can be launched in R as follows:  
 
@@ -58,7 +58,7 @@ This command will invoke Shiny R server locally (**Figure 1**):
 
 ---
 
-### 📂 Importing Data
+### Importing Data
 Use the Import/Export panel on the left side of the interface (**Figures  1** and  **Figure 2**) to import data into SCRAPT:
 
 - Datasets must include one or more samples, each with a unique sample ID.
@@ -80,7 +80,7 @@ Use the Import/Export panel on the left side of the interface (**Figures  1** an
 
 ---
 
-### 🔍 Selecting Samples
+### Selecting Samples
 
 Use the dropdown menu in the Import/Export panel (**Figure 2**) to select one or more samples for analysis.
 
@@ -90,7 +90,7 @@ Use the dropdown menu in the Import/Export panel (**Figure 2**) to select one or
 
 ---
 
-### 🧬 Copy-Number State Grid and Scatter Plot
+### Copy-Number State Grid and Scatter Plot
 
 When one or more samples are selected, SCRAPT generates a scatter plot displaying allelic imbalance (β value) on the y-axis and total copy number (or log2 R) on the x-axis for each gene region (See Main Plot Controls on how to change display mode).
 
@@ -193,7 +193,7 @@ The Main Plot Controls panel (left side of the interface) allows you to customiz
 
 ---
 
-### 🔧 Exploring Tumour Content and Ploidy Solutions
+### Exploring Tumour Content and Ploidy Solutions
 
 SCRAPT offers several ways to explore tumour content and ploidy solutions.
 
@@ -274,7 +274,7 @@ The search space is configured via the Solver Control panel on the left, where u
     <i><b>Figure 6</b>: Example of near-solution space for a solution of tumour content 0.89 and ploidy 3.86 with a range of +/-0.5 and +/-3, for tumour content and ploidy       respectively</i> 
 </p>
 
-###  📤 Exporting Data
+###  Exporting Data
 Once a new tumour content and ploidy solution has been identified, the results can be exported using the Download button in the Import/Export panel (**See Figure 2**).
 
 By default, SCRAPT will override the original tumour content, ploidy, and copy-number state values in the imported dataset.
