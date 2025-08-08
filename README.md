@@ -10,7 +10,7 @@ SCRAPT is a complementary R Shiny tool designed to visually and programmatically
 
 ## Table of Contents
 
- - [📦 Installation](#📦installation)
+ - [📦 Installation](#📦-installation)
  - [📘 Usage](#usage)
    * [🚀 Launch](#launch)
    * [📂 Importing Data](#importing-data)
