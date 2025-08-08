@@ -33,7 +33,7 @@ The following section describes the use of SCRAPT tool
 
 SCRAPT can be launched in R as follows:  
 
-`library(scrapt)`  
+`library(SCRAPT)`  
 `scrapt()`
 
 This command will invoke Shiny R server locally (**Figure 1**):
@@ -104,15 +104,15 @@ This constraint is currently fixed to prevent excessive I/O and rendering times.
 
 The grid is divided into three distinct areas (**See Figure 3**): 
 
-- 🔷 **Top area**:
+- **Top area**:
 Represents autosomal regions where no informative SNPs are available, but log2 R values are estimated.
 Copy-number states in this area are shown using open parentheses, e.g. )1/1(, indicating that allele-specific copy number cannot be resolved.
 
-- 🟩 **Middle area (largest)**:
+- **Middle area (largest)**:
 Represents autosomal regions where both β values and log2 R values are available.
 Copy-number states are shown using closed parentheses, e.g. (1/1), indicating that the copy-number state can be resolved allele-specifically.
 
-- 🟥 **Bottom area**:
+- **Bottom area**:
 Represents X chromosome regions, where only log2 R values can be estimated.
 Copy-number states are shown using square brackets, e.g. [0/1], indicating that only one allele is present (as expected due to X chromosome biology in male samples or loss of heterozygosity in female samples).
 
