@@ -9,18 +9,18 @@ SCRAPT is a complementary R Shiny tool designed to visually and programmatically
 - Francesco et al. (2022) [doi:10.1093/narcan/zcac016](https://pubmed.ncbi.nlm.nih.gov/35664542/)
 
 ## Table of Contents
-- [<img src="306030.svg" width=2.5% title="Gear" alt="Gear"/>](306030.svg) SCRAPT (Systematic CLONET ReAssignment of Ploidy and Tumour content)
-  * [📦 Installation](#---installation)
-  * [📘 Usage](#usage)
-    + [🚀 Launch](#---launch)
-    + [📂 Importing Data](#---importing-data)
-    + [🔍 Selecting Samples](#---selecting-samples)
-    + [🧬 Copy-Number State Grid and Scatter Plot](#---copy-number-state-grid-and-scatter-plot)
-    + [🔧 Exploring Tumour Content and Ploidy Solutions](#---exploring-tumour-content-and-ploidy-solutions)
-    + [📤 Exporting Data](#---exporting-data)
+
+ - [📦 Installation](#📦installation)
+ - [📘 Usage](#usage)
+   * [🚀 Launch](#launch)
+   * [📂 Importing Data](#importing-data)
+   * [🔍 Selecting Samples](#selecting-samples)
+   * [🧬 Copy-Number State Grid and Scatter Plot](#copy-number-state-grid-and-scatter-plot)
+   * [🔧 Exploring Tumour Content and Ploidy Solutions](#exploring-tumour-content-and-ploidy-solutions)
+   * [📤 Exporting Data](#exporting-data)
 
 
-## Installation
+## 📦Installation
 SCRAPT package can be installed using the following command: 
 
 
@@ -28,6 +28,7 @@ SCRAPT package can be installed using the following command:
 
 
 ##  Usage
+The following section describes the use of SCRAPT tool
 ### Launch
 
 SCRAPT can be launched in R as follows:  
