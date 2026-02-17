@@ -17,13 +17,12 @@
 
 
 
-
 scrapt=function(idata=NULL,threads=NULL){
         options(shiny.maxRequestSize=30*1024^2)
+        orange <- crayon::make_style("orange")
         if(is.null(threads)){
-            orange <- crayon::make_style("orange")
             cat(orange("[Warning] Number of cores was not specified\n"))
-            cat(orange("[Warning] Detecting maximum number of cores available\n"))
+            cat(range("[Warning] Detecting maximum number of cores available\n"))
             threads=parallel::detectCores()-1
         }
 
@@ -97,7 +96,6 @@ scrapt=function(idata=NULL,threads=NULL){
             })
 
 
-
             #### Read input data
             in_data <- shiny::reactive({
 
@@ -111,10 +109,15 @@ scrapt=function(idata=NULL,threads=NULL){
                 }else{
                     ai=data.table::fread(input$input_files$datapath)
                 }
-                
-                
 
                 names(ai)<-tolower(names(ai))
+
+             
+                data_type="clonet"
+                if(any(names(ai) %in% c("baf"))){
+                    data_type="battenberg"
+                    ai=ai%>% battenberg_to_clonet()
+                }
 
                 ai=suppressWarnings(ai%>% 
                     dplyr::distinct() %>%
@@ -129,6 +132,8 @@ scrapt=function(idata=NULL,threads=NULL){
                 }
 
                 ai=ai%>% dplyr::arrange(id)
+
+                print(ai)
             
                 return(ai)
             })
@@ -142,7 +147,7 @@ scrapt=function(idata=NULL,threads=NULL){
             })
 
 
-               ###Assign current sample in all samples
+            ###Assign current sample in all samples
             current_sample<-shiny::reactive({
                 if(!is.valid(input$sample)){
                     return(NULL)
@@ -150,7 +155,7 @@ scrapt=function(idata=NULL,threads=NULL){
                 unlist(input$sample)[1]
             })
 
-
+            
 
             #### Gene selection
             genes<-shiny::reactive({

@@ -1055,5 +1055,36 @@ generate_solution_map=function(threads=1){
 }
 
 
-generate_states()
+
+
+
+
+# Check if variables are valid
+#' 
+#' @return
+#' @export
+#' @examples
+
+battenberg_to_clonet=function(ai){
+        ai=ai %>% dplyr::mutate(
+                gene=paste0(chr,":",startpos,"-",endpos),
+                beta=1-2*abs(0.5-baf),
+                focal_log2=logr,
+                all_log2=logr,
+                all_log2_right=logr,
+                all_log2_left=logr,
+                informative_snps=100,
+                snps=100,
+                tc=1,
+                ploidy=2,
+                cnb=nmaj1_a,
+                cna=nmin1_a,
+                cnb.int=nmaj1_a,
+                cna.int=nmin1_a,
+                gene_type="other"
+        ) %>% dplyr::select(sample,gene,beta,focal_log2:snps,cnb:cna.int,tc,ploidy,chr,startpos,endpos)
+
+       return(ai)
+}
+
 

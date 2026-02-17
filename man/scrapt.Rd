@@ -4,7 +4,7 @@
 \alias{scrapt}
 \title{Start SCRAPT shiny server}
 \usage{
-scrapt(threads = 1)
+scrapt(idata = NULL, threads = NULL)
 }
 \arguments{
 \item{threads}{Number of threads to launch SCRAPT}
