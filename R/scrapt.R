@@ -15,8 +15,6 @@
 #' @examples
 
 
-
-
 scrapt=function(idata=NULL,threads=NULL,upload_size=1000000*1024^2){
         options(shiny.maxRequestSize=upload_size)
         orange <- crayon::make_style("orange")
