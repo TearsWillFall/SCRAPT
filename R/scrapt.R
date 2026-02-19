@@ -17,8 +17,8 @@
 
 
 
-scrapt=function(idata=NULL,threads=NULL){
-        options(shiny.maxRequestSize=30*1024^2)
+scrapt=function(idata=NULL,threads=NULL,upload_size=1000000*1024^2){
+        options(shiny.maxRequestSize=upload_size)
         orange <- crayon::make_style("orange")
         if(is.null(threads)){
             cat(orange("[Warning] Number of cores was not specified\n"))
